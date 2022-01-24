@@ -1,5 +1,4 @@
-#Chapter 2
-
+# Chapter 2
 C++ source code compiling command:
 
     g++ hello.cpp -o hello 
