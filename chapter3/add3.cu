@@ -1,11 +1,6 @@
-//! \Brief  Summing two nums sample use CUDA and if-condition
-//!
-//! \Author Shiyi Zhang
-//!
-//! \Create 02/19/2022
-//!
-//! \ChangeLog 02/22/2022 Debug: Make grid_size to the closest round-up int
-
+//
+// Created by shiyi on 01/27/2022.
+//
 
 #include <math.h>
 #include <stdio.h>
@@ -15,12 +10,12 @@ const double a = 1.23;
 const double b = 2.34;
 const double c = 3.57;
 
-void __global__ add(const double *x, const double *y, double *z, int N);
+void __global__ add(const double *x, const double *y, double *z);
 void check(const double *z, const int N);
 
 int main(void)
 {
-    const int N = 100000001;
+    const int N = 100000000;
     const int M = sizeof(double) * N;
     // allocate host memory
     // initiate dynamic memory with new operator
@@ -45,8 +40,8 @@ int main(void)
     cudaMemcpy(d_y, h_y, M, cudaMemcpyHostToDevice);
     // set grid size, block size and call add kernel function
     const int block_size = 128;
-    const int grid_size = (N + block_size - 1) / block_size; // make grid_size round up to the closest int num
-    add<<<grid_size, block_size>>>(d_x, d_y, d_z, N);
+    const int grid_size = N / block_size;
+    add<<<grid_size, block_size>>>(d_x, d_y, d_z);
     // copy result back from device to host
     cudaMemcpy(h_z, d_z, M, cudaMemcpyDeviceToHost);
     check(h_z, N);
@@ -63,13 +58,10 @@ int main(void)
     return 0;
 }
 
-void __global__ add(const double *x, const double *y, double *z, int N)
+void __global__ add(const double *x, const double *y, double *z)
 {
     const int n = blockDim.x * blockIdx.x + threadIdx.x;
-    if (n < N)
-    {
-        z[n] = x[n] + y[n];
-    }
+    z[n] = x[n] + y[n];
 }
 
 void check(const double *z, const int N)
